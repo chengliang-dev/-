@@ -1,0 +1,67 @@
+C+实现一个简单的单例模式
+标准的懒汉、饿汉模式
+class Singleton{
+     private:
+     //首先其三个构造函数应当私有的
+     Singleton();
+     Singleton(Singleton& ) = delete;
+     Singleton& operator=(Singleton& ) = delete;
+     static Singleton* my_instance;
+     public:
+     //函数应当是静态的，不依赖于某个对象
+     static Singleton* get_instance(){
+            /*懒汉模式
+            if(NULL == my_instance){
+                  my_instance = new Singleton();
+            }
+            */
+            return my_instance;
+     }
+};
+//
+Singleton* Singleton::my_instance = NULL;                //懒汉模式，在多线程下是不安全的，懒汉模式是以时间换取空间
+Singleton* Singleton::my_instance = new Singleton()      //饿汉模式，解决了线程不安全的问题，饿汉模式是以空间换时间
+
+
+
+如果要克服懒汉模式，“双检锁”+“自动回收"
+static Singleton* get_instance(){
+      if(NULL == my_intsance){
+             //加锁
+             Lock();
+             if(NULL == my_instance){
+                   my_instance = new Singleton();
+             }
+             //解锁
+             Unlock();
+      }
+      return my_instance;
+}
+//实现一个垃圾自动回收机制,这个是内嵌于单例模式中的.
+class CGarbo{
+      public:
+      ~CGarbo(){
+            if(Singleton::my_instance){
+                  delete my_instance;
+            }
+      }
+      static CGarbo Garbo;
+}
+Singleton::CGarbo Grarbo;
+
+//对比单检锁,单检锁的缺陷在于每次判断都需要事前加锁，如果有很多线程就会造成大量的阻塞。于是就有了双重锁定
+static Singleton* get_instance(){
+      Lock()
+      if(NULL == my_intsance){
+           my_instance = new Singleton();
+      }
+      Unlock();
+      return my_instance;
+}
+
+//饿汉模式同样存在着一些问题，就是C++中非局部静态对象的初始化顺序的不确定性  Effective C++条款47
+//考虑：如果有这样的两个单例类，将分别生成单例对象A和单例对象B，他们分别定义在不同的编译单元(cpp)，而A的初始化依赖于B，即A的构造函数中要调用B::get_instance(),而此时B::my_instance还未初始化，
+//显然调用的结果是非法的，
+//boost库
+.....后续补充
+
