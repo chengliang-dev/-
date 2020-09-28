@@ -1,1 +1,7 @@
+auto_ptr
 
+shared_ptr
+
+unique_ptr
+
+weak_ptr    //使用智能指针内存同样发生了泄露，可能会是循环引用的锅
