@@ -1,0 +1,70 @@
+1.智能指针
+void* alloc(){
+  int *p = new int;
+  return p;
+}
+
+int main(){
+  alloc();
+  //在这里资源并没有释放
+  return 0;
+}
+
+Python和Java使用了垃圾回收技术
+
+C++的解决方法：RAII（Resource Acquisition Is Initilization)
+C++三种智能指针：shared_ptr,unique_ptr(是对auto_ptr的修正),weak_ptr
+
+早期的产物：auto_ptr
+1.增加一个资源的计数器，记录资源使用的次数，避免资源重复释放的问题
+
+但还会有两个问题：
+1.如果对其中一个类对象中的资源进行了修改，那么所有引用该资源的对象会被全部修改，这显然是错误的-------> 写时拷贝,在写的时候重新分配内存（资源的拷贝，引用计数器的加减）·
+2.当前的计数器作用域Student类，子啊使用的时候，需要强行加上引用计数类，这样复用性不好，使用不方便
+
+智能指针:
+1.用起来像指针
+2.会自己对资源进行释放
+
+class Cstudent{
+  public:
+  Cstudent(){}
+  void test(){
+      cout<<"Cstudent"<<endl;
+  }
+  private:
+  char* m_pszBuf;
+  int m_nSex;
+}
+//创建一个类，利用该类的构造和析构的机制，来自动解决资源的释放问题,auto_ptr使用拷贝移动
+//智能指针雏形
+class CSmartPtr{
+    public:
+    //传进来的对象一定要是一个堆对象
+    CSmartPtr(Cstudent* pObj){
+        m_Obj = pObj;
+    }
+    ~CSmartPtr(){
+        if(m_Obj != nullptr) delete m_Obj;
+    }
+    //用起来像个指针
+    Cstudent* operator->(){
+        return m_Obj;
+    }
+    Cstudent& operator*(){
+        return *m_Obj; 
+    }
+    private:
+    Cstudent* m_Obj;   //将资源放入智能指针类中管理起来
+
+}
+int main(){
+    Cstudent* pStu = new Cstudent();
+    CSmartPtr sp(new Cstudent());
+    if(pStu != nullptr){
+        delete pStu;
+        pStu = nullptr;
+    }
+    
+    return 0;
+}
