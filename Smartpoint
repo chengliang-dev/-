@@ -68,3 +68,27 @@ int main(){
     
     return 0;
 }
+
+2.auto_ptr的替代者unique_ptr 缺点：没有引用计数
+不能有两个auto_ptr对象拥有同一个内部指针的所有权，因为有可能在某个时机，两者均会尝试析构这个内部指针
+当两个auto_ptr对象之间发生赋值的操作时，内部指针被拥有的所有权会被转移，这意味着这个赋值的右者对象回丧失该所有权，不再指向这个内部指针,那么这个时候可能会使用已经被置为空的指针   
+std::auto_ptr<int> aptr(new int(3));
+
+auto_ptr存在的问题
+1. 作为参数传递（值传递）会出错
+2. 不能使用vector数组 
+
+unique_ptr的使用，auto_ptr的升级版，限制了拷贝构造函数和拷贝赋值操作，多了个Move操作，多了个语义上的剪切的操作，但剪切后的指针还是不能用
+
+shared_ptr带了引用计数的智能指针
+用同一个指针去初始化shared_ptr也会出现重复析构的问题
+ex:
+int* p = new int(3);
+{
+    std::shared_ptr<int> sptr(p);
+    {
+        std::shared_ptr<int> sptr1(p);
+    }
+}  //最好遵循RAII原则
+
+为什么需要weak_ptr,避免循环引用
