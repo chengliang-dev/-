@@ -1,0 +1,53 @@
+C++内存拷贝
+首先介绍最经典的strcpy，写出其源代码
+void strcpy(char* strdest, const char* strsrc){
+      //首先使用断言判断两根指针是否为空指针
+      assert((strdest != NULL) && (strsrc != NULL));
+      while(*strsrc != '\0') *strdest++ = *strsrc++;
+}
+
+//这种情况下并未考虑到内存重叠的情况
+C++中又给出memcpy与memmove两种函数
+memcpy与memmove都是对内存进行拷贝，可以拷贝任何内容，而strcpy仅是对字符串进行操作
+memcpy与memmove拷贝多少是通过第三个参数进行控制而strcpy是当拷贝到'\0'停止
+函数说明
+1. memcpy函数的功能是从源src所指的内存地址的起始位置开始拷贝N个字节到目标dst所指的内存地址的起始位置中
+2. memmove函数的功能同memcpy基本一致，但是当src与dst内存区域重叠时，memcpy可能会出现错误，而memmove能正确进行拷贝。
+void* __memcpy(void* dest,const void* src, size_t count){
+  assert(src != nullptr && dest != nullptr);
+  //强制类型转换，使得每次拷贝均是对内存中的一个字节进行操作
+  char* tmp_dest = (char*)dest;
+  const char* tmp_src = (const char*)src;
+  while(count--){
+      *tmp_dest++ = *tmp_src++;
+  return dest;
+}
+//如果内存重叠，则会发生错误
+
+void* __memmove(void* dest, const void* src, size_t count){
+    assert(dest != nullptr && src != nullptr);
+    char* tmp_dest = (char*)dest;
+    const char* tmp_src = (const char*)src;
+    /*
+    if(tmp_dest < tmp_src)  //当dest地址小于src地址时，从前向后进行拷贝{   
+         while(count--) *tmp_dest++ = *tmp_src++;
+    else if(tmp_dest > tmp_src){ //否则，从后向前进行拷贝
+         tmp_dest += count-1;
+         tmp_src  += count-1;
+         while(count--){
+              *tmp_dest-- = *tmp_src--;
+         }
+    }
+    */
+    if(tmp_dest <= tmp_src || tmp_dest >= (tmp_src + count)){  //正向拷贝
+          while(count--) *tmp_dest++ = *tmp_src++;
+    }
+    else{//否则进行反向拷贝
+        tmp_dest += count-1;
+         tmp_src  += count-1;
+         while(count--){
+              *tmp_dest-- = *tmp_src--;
+         }
+    }
+    reutrn dest;
+}
